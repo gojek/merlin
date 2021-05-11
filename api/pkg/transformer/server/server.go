@@ -132,9 +132,13 @@ func (s *Server) PredictHandler(w http.ResponseWriter, r *http.Request) {
 		s.logger.Debug("postprocess response", zap.ByteString("postprocess_response", postprocessedRequestBody))
 	}
 
+	s.logger.Debug("copy header")
 	copyHeader(w.Header(), resp.Header)
+	s.logger.Debug("write header")
 	w.WriteHeader(resp.StatusCode)
+	s.logger.Debug("write body")
 	w.Write(postprocessedRequestBody)
+	s.logger.Debug("success write body")
 }
 
 func (s *Server) preprocess(ctx context.Context, request []byte, requestHeader http.Header) ([]byte, error) {
