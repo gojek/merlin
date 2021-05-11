@@ -81,7 +81,7 @@ func (s *Server) PredictHandler(w http.ResponseWriter, r *http.Request) {
 		response.NewError(http.StatusInternalServerError, err).Write(w)
 		return
 	}
-	defer r.Body.Close()
+	// defer r.Body.Close()
 	s.logger.Debug("raw requestBody", zap.ByteString("requestBody", requestBody))
 
 	preprocessedRequestBody := requestBody
@@ -129,6 +129,7 @@ func (s *Server) PredictHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		pipelineLatency.WithLabelValues(successResult, postprocessStep).Observe(float64(postprocessDurationMs))
+		s.logger.Debug("postprocess response", zap.ByteString("postprocess_response", postprocessedRequestBody))
 	}
 
 	copyHeader(w.Header(), resp.Header)
@@ -154,7 +155,7 @@ func (s *Server) predict(ctx context.Context, r *http.Request, request []byte) (
 	span, ctx := opentracing.StartSpanFromContext(ctx, "predict")
 	defer span.Finish()
 
-	predictURL := fmt.Sprintf("%s/v1/models/%s:predict", s.options.ModelPredictURL, s.options.ModelName)
+	predictURL := "http://echo-pyfunc.integration-test.models.id.s.gods.golabs.io/v1/predict" //fmt.Sprintf("%s/v1/models/%s:predict", s.options.ModelPredictURL, s.options.ModelName)
 	if !strings.Contains(predictURL, "http://") {
 		predictURL = "http://" + predictURL
 	}
